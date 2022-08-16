@@ -1,0 +1,25 @@
+name: Test
+on: [push]
+
+jobs:
+  test-linux:
+    name: Linux
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test
+        run: |
+          curl -sSL https://graphql-hive.com/install.sh | sh
+  test-win:
+    name: Windows
+    runs-on: windows-latest
+    steps:
+      - name: Test
+        run: |
+          curl -sSL https://graphql-hive.com/install.sh | sh
+  test-mac:
+    name: MacOs
+    runs-on: macos-latest
+    steps:
+      - name: Test
+        run: |
+          curl -sSL https://graphql-hive.com/install.sh | sh
