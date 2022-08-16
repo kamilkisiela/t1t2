@@ -68,7 +68,8 @@ get_bin_path() {
 
 download() {
   DOWNLOAD_DIR=$(mktemp -d)
-  UNPACK_DIR="/usr/local/lib"
+  UNPACK_DIR=$(mktemp -d)
+#   UNPACK_DIR="/usr/local/lib"
 
   URL="https://graphql-hive-cli.s3.us-east-2.amazonaws.com/channels/stable/hive-$OS_ARCH.tar.gz"
   echo "Downloading $URL"
@@ -87,6 +88,8 @@ download() {
 
   echo "Installing to /usr/local/bin/hive"
   rm -f /usr/local/bin/hive
+  rm -f /usr/local/lib/hive
+  mv "${UNPACK_DIR}" /usr/local/lib
   ln -s /usr/local/lib/hive/bin/hive /usr/local/bin/hive
 }
 
