@@ -15,10 +15,8 @@
     $SUDO bash <<SCRIPT
       set -e
       
-      os=$(uname -s)
-      arch=$(uname -m)
-      OS=${OS:-"${os}"}
-      ARCH=${ARCH:-"${arch}"}
+      OS=""
+      ARCH=""
       OS_ARCH=""
 
       echoerr() { echo "\$@" 1>&2; }
@@ -38,67 +36,49 @@
       }
 
       set_os_arch() {
-        case $OS in
-          CYGWIN* | MINGW64* | Windows*)
-            unsupported_win
-            ;;
-          Darwin)
-            case $ARCH in
-              x86_64 | amd64)
-                OS_ARCH="darwin-x64"
-                ;;
-              arm64)
-                OS_ARCH="darwin-arm64"
-                ;;
-              *)
-                unsupported_arch $OS $ARCH
-                ;;
-            esac
-            ;;
-          Linux)
-            case $ARCH in
-              x86_64 | amd64)
-                OS_ARCH="linux-x64"
-                ;;
-              arm64 | aarch64)
-                OS_ARCH="linux-arm"
-                ;;
-              *)
-                unsupported_arch $OS $ARCH
-                ;;
-            esac
-            ;;
-          *)
-            unsupported_arch $OS $ARCH
-            ;;
-        esac
-      }
-
-      get_bin_path() {
-        path="/usr/local/bin/${BIN_NAME}"
-        if [ "${OS}" = 'windows' ]; then
-          path="./${BIN_NAME}"
+        if [ "\$(uname)" == "Darwin" ]; then
+          OS=darwin
+        elif [ "\$(expr substr \$(uname -s) 1 5)" == "Linux" ]; then
+          OS=linux
+        else
+          unsupported_win
         fi
 
-        echo "${path}"
+        ARCH="\$(uname -m)"
+        if [ "\$ARCH" == "x86_64" ]; then
+          ARCH=x64
+        elif [ "\$ARCH" == "amd64" ]; then
+          ARCH=x64
+        elif [ "\$ARCH" == "arm64" ]; then
+          if [ "\$OS" == "darwin" ]; then
+            ARCH=arm64
+          else
+            ARCH=arm
+          fi
+        elif [[ "\$ARCH" == aarch* ]]; then
+          ARCH=arm
+        else
+          unsupported_arch $OS $ARCH
+        fi
       }
 
       download() {
         DOWNLOAD_DIR=$(mktemp -d)
 
-        URL="https://graphql-hive-cli.s3.us-east-2.amazonaws.com/channels/stable/hive-$OS_ARCH.tar.gz"
-        echo "Downloading $URL"
+        TARGET="\$OS-\$ARCH"
+        URL="https://graphql-hive-cli.s3.us-east-2.amazonaws.com/channels/stable/hive-\$TARGET.tar.gz"
+        echo "Downloading \$URL"
 
-        if ! curl --progress-bar --fail -L "$URL" -o "$DOWNLOAD_DIR/hive.tar.gz"; then
+        if ! curl --progress-bar --fail -L "\$URL" -o "\$DOWNLOAD_DIR/hive.tar.gz"; then
           echo "Download failed."
           exit 1
         fi
 
-        echo "Downloaded to $DOWNLOAD_DIR"
+        echo "Downloaded to \$DOWNLOAD_DIR"
 
         rm -rf "/usr/local/lib/hive"
-        tar xzf "$DOWNLOAD_DIR/hive.tar.gz" -C /usr/local/lib
-        rm -rf "$DOWNLOAD_DIR"
+        tar xzf "\$DOWNLOAD_DIR/hive.tar.gz" -C /usr/local/lib
+        rm -rf "\$DOWNLOAD_DIR"
         echo "Unpacked to /usr/local/lib/hive"
 
         echo "Installing to /usr/local/bin/hive"
