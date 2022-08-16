@@ -80,7 +80,7 @@ download() {
 
   echo "Downloaded to $DOWNLOAD_DIR"
 
-  rm -rf "$UNPACK_DIR"
+  rm -rf "$UNPACK_DIR/hive"
   tar xzf "$DOWNLOAD_DIR/hive.tar.gz" -C "$UNPACK_DIR"
   rm -rf "$DOWNLOAD_DIR"
   echo "Unpacked to $UNPACK_DIR"
